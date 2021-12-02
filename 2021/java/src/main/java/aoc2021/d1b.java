@@ -3,42 +3,32 @@ package aoc2021;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
-import java.util.function.Consumer;
-import java.util.function.IntConsumer;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class d1b {
     public static void main(String ... args) throws Exception {
 
-        IntStream depths = Files.lines(Path.of("../input/1a.txt"))
-            .mapToInt(Integer::parseInt);
+        Counter counter = Files.lines(Path.of("../input/1a.txt"))
+            .map(Integer::parseInt)
+            .reduce(new Counter(), (c, d) -> c.accept(d), (a,b) -> b);
         
-        Counter c = new Counter();
-        depths.forEach(c);
-        System.out.println(c.count);
+        System.out.println(counter.count);
     }
 
-    static class Counter implements IntConsumer {
-        int count = 0;
-        int prev = Integer.MAX_VALUE;
+    record Counter(int prev, int count, LinkedList<Integer> slider) {
 
-        LinkedList<Integer> slider = new LinkedList<>();
+        Counter() {
+            this(Integer.MAX_VALUE, 0, new LinkedList<>());
+        }
 
-        @Override
-        public void accept(int value) {
-            slider.add(value);
+        Counter accept(int depth) {
+            slider.add(depth);
             if (slider.size() < 3) {
-                return;
+                return new Counter(prev, count, slider);
             } else if (slider.size() > 3) {
                 slider.removeFirst();
             }
-
             int sum = slider.stream().mapToInt(Integer::intValue).sum();
-            if (prev != Integer.MAX_VALUE && sum > prev) {
-                count++;
-            }
-            prev = sum;
+            return new Counter(sum, prev != Integer.MAX_VALUE && sum > prev ? count +1 : count, slider);
         }
     }
 }
