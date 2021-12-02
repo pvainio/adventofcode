@@ -3,7 +3,7 @@ package aoc2021;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class d2a {
+public class D2a {
 
     public static void main(String ... args) throws Exception {
 

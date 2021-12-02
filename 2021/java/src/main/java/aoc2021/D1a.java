@@ -3,7 +3,7 @@ package aoc2021;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class d1a {
+public class D1a {
 
     record Counter(int prev, int count) {
 

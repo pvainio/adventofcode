@@ -4,7 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 
-public class d1b {
+public class D1b {
     public static void main(String ... args) throws Exception {
 
         Counter counter = Files.lines(Path.of("../input/1a.txt"))
