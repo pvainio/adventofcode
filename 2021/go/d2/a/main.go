@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Advent of Code (AOC) 2021 Day 2 part 1
 func main() {
 
 	var pos int

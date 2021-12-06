@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Advent of Code (AOC) 2021 Day 4 part 1
 func main() {
 
 	var data []string

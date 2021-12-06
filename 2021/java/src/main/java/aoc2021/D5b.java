@@ -7,6 +7,9 @@ import java.util.TreeMap;
 
 import aoc2021.D5a.Line;
 
+/**
+ * Advent of Code (AOC) 2021 Day 5 part 2
+ */
 public class D5b {
 
     public static void main(String ... args) throws Exception {

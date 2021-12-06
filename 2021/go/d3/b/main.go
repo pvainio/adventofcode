@@ -50,6 +50,7 @@ func filterUntilOne(acceptMostCommon bool, data []string) string {
 	return data[0]
 }
 
+// Advent of Code (AOC) 2021 Day 3 part 2
 func main() {
 
 	var data []string

@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Advent of Code (AOC) 2021 Day 6 part 2
 func main() {
 
 	fish := make(map[int]int)

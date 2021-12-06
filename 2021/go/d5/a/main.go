@@ -6,6 +6,7 @@ import (
 	"fmt"
 )
 
+// Advent of Code (AOC) 2021 Day 5 part 1
 func main() {
 
 	coord := make(map[int]map[int]int)

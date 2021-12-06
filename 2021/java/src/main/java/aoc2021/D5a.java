@@ -9,6 +9,9 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * Advent of Code (AOC) 2021 Day 5 part 1
+ */
 public class D5a {
 
     record Point(int x, int y) {

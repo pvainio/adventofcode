@@ -8,6 +8,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * Advent of Code (AOC) 2021 Day 4 part 1
+ */
 public class D4a {
 
     public record Board(List<List<Integer>> numbers, LinkedList<Integer> marks) {

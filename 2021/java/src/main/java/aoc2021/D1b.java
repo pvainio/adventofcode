@@ -4,6 +4,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 
+/**
+ * Advent of Code (AOC) 2021 Day 1 part 2
+ */
 public class D1b {
     public static void main(String ... args) throws Exception {
 

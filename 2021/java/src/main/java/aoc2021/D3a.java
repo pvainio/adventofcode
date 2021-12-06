@@ -5,6 +5,9 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Advent of Code (AOC) 2021 Day 3 part 1
+ */
 public class D3a {
 
     public static void main(String ... args) throws Exception {

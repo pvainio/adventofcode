@@ -6,6 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * Advent of Code (AOC) 2021 Day 6 part 1
+ */
 public class D6a {
 
     public static void main(String ... args) throws Exception {

@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Advent of Code (AOC) 2021 Day 6 part 1
 func main() {
 
 	var fish []int

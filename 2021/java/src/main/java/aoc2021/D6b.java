@@ -8,6 +8,9 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Advent of Code (AOC) 2021 Day 6 part 2
+ */
 public class D6b {
 
     record Fish(int timer, long count) {}

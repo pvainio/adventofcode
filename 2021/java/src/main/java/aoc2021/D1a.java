@@ -3,6 +3,9 @@ package aoc2021;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * Advent of Code (AOC) 2021 Day 1 part 1
+ */
 public class D1a {
 
     record Counter(int prev, int count) {

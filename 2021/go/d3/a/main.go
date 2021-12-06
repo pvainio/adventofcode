@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// Advent of Code (AOC) 2021 Day 3 part 1
 func main() {
 
 	var count int

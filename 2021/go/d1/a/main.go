@@ -8,6 +8,7 @@ import (
 	"strconv"
 )
 
+// Advent of Code (AOC) 2021 Day 1 part 1
 func main() {
 
 	var prev int = math.MaxInt
