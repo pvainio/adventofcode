@@ -3,6 +3,7 @@ package aoc2021;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import aoc2021.D2a.Position;
+import aoc2021.D2a.Instruction;
 
 /**
  * Advent of Code (AOC) 2021 Day 2 part 2

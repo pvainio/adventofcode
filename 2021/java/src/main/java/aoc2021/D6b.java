@@ -4,7 +4,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,10 +27,6 @@ public class D6b {
         }
 
         System.out.printf("%s\n", fish.values().stream().mapToLong(i -> i).sum());
-    }
-
-    static BiFunction<Integer, Long, Long> setOrInc(Long value) {
-        return (k, v) -> v == null ? value : v + value;
     }
 
     static Map<Integer,Long> spawn(Map<Integer, Long> fish) {
