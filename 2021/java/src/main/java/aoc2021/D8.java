@@ -6,16 +6,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Advent of Code (AOC) 2021 Day 8 part 2
+ * Advent of Code (AOC) 2021 Day 8
  */
-public class D8b {
+public class D8 {
 
     record Entry(List<String> patterns, List<String> digits, Map<Integer,String> solved) {
-
         static Entry parse(String line) {
             String[] parts = line.split("\\|");
             return new Entry(List.of(parts[0].trim().split(" ")), List.of(parts[1].trim().split(" ")), new HashMap<>());
@@ -24,11 +24,26 @@ public class D8b {
 
     public static void main(String ... args) throws Exception {
 
-        var count = Files.lines(Path.of("../input/8a.txt"))
+        List<Entry> data = Files.lines(Path.of("../input/8a.txt"))
             .map(Entry::parse)
-            .mapToLong(D8b::solve)
+            .toList();
+
+        var count1 = data.stream()
+            .flatMap(e -> e.digits.stream())
+            .filter(digit -> isSimple(digit))
+            .count();
+        System.out.printf("part 1: %d\n", count1);
+
+        var count2 = data.stream()
+            .mapToLong(e -> solve(e))
             .sum();
-        System.out.printf("%d\n", count);
+        System.out.printf("part 2: %d\n", count2);
+    }
+
+    static Set<Integer> simpleDigitLen = Set.of(2, 3, 4, 7);
+
+    static boolean isSimple(String digit) {
+        return simpleDigitLen.contains(digit.length());
     }
 
     static long solve(Entry e) {
@@ -39,10 +54,10 @@ public class D8b {
         e = solve(e, 8, p -> p.length() == 7);
 
         // 3 has 5 segments and contains all segments of 1
-        String d1 = e.solved.get(1);
-        e = solve(e, 3, p -> p.length() == 5 && containsChars(p, d1));
+        String digit1 = e.solved.get(1);
+        e = solve(e, 3, p -> p.length() == 5 && containsChars(p, digit1));
         // 6 has 6 segments and does not contain all segments of 1
-        e = solve(e, 6, p -> p.length() == 6 && !containsChars(p, d1));
+        e = solve(e, 6, p -> p.length() == 6 && !containsChars(p, digit1));
 
         // separate 2 and 5 based on top left segment
         var topLeft = solveTopLeft(e.solved);
@@ -52,15 +67,16 @@ public class D8b {
         // separate 9 and 0 based on bottom right segment
         var bottomRight = solveBottomRight(e.solved);
         e = solve(e, 9, p -> p.length() == 6 && p.indexOf(bottomRight) == -1);
-        var res = solve(e, 0, p -> p.length() == 6 && p.indexOf(bottomRight) != -1);
+        e = solve(e, 0, p -> p.length() == 6 && p.indexOf(bottomRight) != -1);
 
-        var str = res.digits.stream().map(d -> toDigit(res, d)).collect(Collectors.joining(""));
+        var solved = e.solved;
+        var str = e.digits.stream().map(d -> toDigit(solved, d)).collect(Collectors.joining(""));
 
         return Long.parseLong(str);
     }
 
-    static String toDigit(Entry entry, String pattern) {
-        return entry.solved.entrySet().stream()
+    static String toDigit(Map<Integer,String> solved, String pattern) {
+        return solved.entrySet().stream()
             .filter(e -> e.getValue().length() == pattern.length() && containsChars(e.getValue(), pattern))
             .map(e -> e.getKey().toString())
             .findAny().get();

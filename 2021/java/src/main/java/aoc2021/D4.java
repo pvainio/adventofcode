@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Advent of Code (AOC) 2021 Day 4 part 1
+ * Advent of Code (AOC) 2021 Day 4
  */
-public class D4a {
+public class D4 {
 
     public record Board(List<List<Integer>> numbers, LinkedList<Integer> marks) {
         Board() {
@@ -52,7 +52,7 @@ public class D4a {
         int sumUnmarked() {
             return numbers.stream().flatMap(r -> r.stream())
                 .filter(n -> n > 0)
-                .mapToInt(i -> i.intValue())
+                .mapToInt(i -> i)
                 .sum();
     
         }
@@ -78,30 +78,36 @@ public class D4a {
         List<String> data = Files.lines(Path.of("../input/4a.txt")).toList();
 
         List<Board> boards = parseBoards(data.stream().skip(1));
+        List<Integer> numbers = Arrays.stream(data.get(0).split(",")).map(Integer::parseInt).toList();
 
-        String[] numbers = data.get(0).split(",");
+        Board winner1 = play(boards, numbers);
 
-        Board winner = play(boards, numbers);
-
-        int sum = winner.numbers.stream().flatMap(r -> r.stream())
-            .filter(n -> n > 0)
-            .mapToInt(i -> i.intValue())
+        int sum = winner1.numbers.stream().flatMap(row -> row.stream())
+            .filter(number -> number > 0)
+            .mapToInt(i -> i)
             .sum();
 
-        int last = winner.marks.getLast();
+        int last = winner1.marks.getLast();
 
-        System.out.printf("%d %d %d\n", sum, last, last * sum);
+        System.out.printf("part 1: %d\n", last * sum);
+
+        boards = parseBoards(data.stream().skip(1));
+        Board winner2 = null;
+        while(!boards.isEmpty()) {
+            winner2 = play(boards, numbers);
+            boards.remove(winner2);
+        }
+
+        int sum2 = winner2.sumUnmarked();
+        int last2 = winner2.marks().get(winner2.marks().size()-1);
+
+        System.out.printf("part 2: %d\n", last2 * sum2);
     }
 
-    static Board play(List<Board> boards, String[] numbers) {
-        for (String number : numbers) {
-            Integer n = Integer.parseInt(number);
-            for (Board b : boards) {
-                if(b.mark(n)) {
-                    return b;
-                }
-            }
-        }
-        return null;
+    /** Play numbers and return winning board. */
+    static Board play(List<Board> boards, List<Integer> numbers) {
+        return numbers.stream()
+            .flatMap(number -> boards.stream().filter(b -> b.mark(number)))
+            .findFirst().orElse(null);
     }
 }

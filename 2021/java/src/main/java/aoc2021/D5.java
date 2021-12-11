@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * Advent of Code (AOC) 2021 Day 5 part 1
+ * Advent of Code (AOC) 2021 Day 5
  */
-public class D5a {
+public class D5 {
 
     record Point(int x, int y) {
         static Point parse(String str) {
@@ -40,11 +40,10 @@ public class D5a {
 
     private static void plot(Map<Integer,Map<Integer,Integer>> coords, int x, int y) {
         var row = coords.computeIfAbsent(y, ys -> new TreeMap<>());
-        row.compute(x, (k, v) -> (v == null) ? 1 : v + 1);
+        row.merge(x, 1, (k, v) -> v + 1);
     }
 
     static void plot(Map<Integer,Map<Integer,Integer>> coords, Line line) {
-
         var xs = range(line.p1.x, line.p2.x);
         var ys = range(line.p1.y, line.p2.y);
 
@@ -67,12 +66,18 @@ public class D5a {
 
         var data = Files.lines(Path.of("../input/5a.txt"))
             .map(Line::parse)
-            .filter(l -> l.p1.x == l.p2.x || l.p1.y == l.p2.y)
             .toList();
 
         Map<Integer,Map<Integer,Integer>> coords = new TreeMap<>();
-        data.forEach(l -> plot(coords, l));
+        data.stream()
+            .filter(l -> l.p1.x == l.p2.x || l.p1.y == l.p2.y)
+            .forEach(l -> plot(coords, l));
 
-        System.out.printf("%d\n", sum(coords));
+        System.out.printf("part 1: %d\n", sum(coords));
+
+        Map<Integer,Map<Integer,Integer>> coords2 = new TreeMap<>();
+        data.forEach(l -> plot(coords2, l));
+
+        System.out.printf("part 2: %d\n", sum(coords2));
     }
 }
