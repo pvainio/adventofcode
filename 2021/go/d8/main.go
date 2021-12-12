@@ -8,33 +8,43 @@ import (
 	"strings"
 )
 
-// Advent of Code (AOC) 2021 Day 8 part 2
-func main() {
+type entry struct {
+	patterns []string
+	output   []string
+}
 
-	count := 0
+// Advent of Code (AOC) 2021 Day 8
+func main() {
+	var data []entry
 
 	util.ReadFile("../input/8a.txt", func(line string) {
 		parts := strings.Split(line, "|")
 		patterns := sortCharsInStrings(strings.Fields(parts[0]))
 		output := sortCharsInStrings(strings.Fields(parts[1]))
+		data = append(data, entry{patterns: patterns, output: output})
+	})
 
-		// 2: 1
-		// 3: 7
-		// 4: 4
-		// 5: 2, 3, 5
-		// 6: 0, 6, 9
-		// 7: 8
-		//  _  _       _      __   _   _
-		//  _| _| |_| |_  |_    | |_| | |
-		// |_  _|   |  _| |_|   |  _| |_|
+	count1 := 0
 
+	for _, e := range data {
+		for _, digit := range e.output {
+			// 1==2, 7==3, 4 == 4, 8 == 7
+			if _, ok := easyLenToDigit[len(digit)]; ok {
+				count1++
+			}
+		}
+	}
+
+	fmt.Printf("part 1: %v\n", count1)
+
+	count2 := 0
+	for _, e := range data {
 		// 1, 4, 7, 8
-		solved, patterns := solveEasy(patterns)
+		solved, unsolved := solveEasy(e.patterns)
 		// 2, 3, 5, 6, 9, 0
-		solved = solve362590(solved, patterns)
-
+		solved = solve362590(solved, unsolved)
 		res := ""
-		for _, digit := range output {
+		for _, digit := range e.output {
 			for pos, pattern := range solved {
 				if digit == pattern {
 					res += strconv.Itoa(pos)
@@ -42,21 +52,25 @@ func main() {
 			}
 		}
 		i, _ := strconv.Atoi(res)
-		count += i
-	})
-
-	fmt.Printf("%v\n", count)
+		count2 += i
+	}
+	fmt.Printf("part 2: %v\n", count2)
 }
 
-func solve(n int, solved []string, patterns []string, fn func(pattern string) bool) ([]string, []string) {
-	for pos, pattern := range patterns {
-		if fn(pattern) {
-			solved[n] = pattern
-			patterns = append(patterns[:pos], patterns[pos+1:]...)
+var easyLenToDigit = map[int]int{2: 1, 3: 7, 4: 4, 7: 8}
+
+func solveEasy(patterns []string) ([]string, []string) {
+	var digits []string = make([]string, 10)
+	var resPatterns []string
+
+	for _, pattern := range patterns {
+		if digit, ok := easyLenToDigit[len(pattern)]; ok {
+			digits[digit] = pattern
+		} else {
+			resPatterns = append(resPatterns, pattern)
 		}
 	}
-
-	return solved, patterns
+	return digits, resPatterns
 }
 
 func solve362590(solved []string, patterns []string) []string {
@@ -76,6 +90,17 @@ func solve362590(solved []string, patterns []string) []string {
 	solved, _ = solve(0, solved, patterns, func(pattern string) bool { return len(pattern) == 6 && strings.Contains(pattern, bottomRight) })
 
 	return solved
+}
+
+func solve(n int, solved []string, patterns []string, fn func(pattern string) bool) ([]string, []string) {
+	for pos, pattern := range patterns {
+		if fn(pattern) {
+			solved[n] = pattern
+			patterns = append(patterns[:pos], patterns[pos+1:]...)
+		}
+	}
+
+	return solved, patterns
 }
 
 func solveBottomRightSegment(solved []string) string {
@@ -102,27 +127,6 @@ func containsChars(s1 string, s2 string) bool {
 		}
 	}
 	return true
-}
-
-func solveEasy(patterns []string) ([]string, []string) {
-	var digits []string = make([]string, 10)
-	var resPatterns []string
-
-	for _, pattern := range patterns {
-		switch len(pattern) {
-		case 2:
-			digits[1] = pattern
-		case 3:
-			digits[7] = pattern
-		case 4:
-			digits[4] = pattern
-		case 7:
-			digits[8] = pattern
-		default:
-			resPatterns = append(resPatterns, pattern)
-		}
-	}
-	return digits, resPatterns
 }
 
 func sortCharsInStrings(strs []string) []string {

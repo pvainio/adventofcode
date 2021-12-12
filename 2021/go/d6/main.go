@@ -7,9 +7,8 @@ import (
 	"strings"
 )
 
-// Advent of Code (AOC) 2021 Day 6 part 2
+// Advent of Code (AOC) 2021 Day 6
 func main() {
-
 	fish := make(map[int]int)
 	util.ReadFile("../input/6a.txt", func(line string) {
 		parts := strings.Split(line, ",")
@@ -19,11 +18,17 @@ func main() {
 		}
 	})
 
-	for i := 0; i < 256; i++ {
+	for i := 0; i < 80; i++ {
 		fish = spawn(fish)
 	}
 
-	fmt.Printf("%v\n", count(fish))
+	fmt.Printf("part 1: %v\n", count(fish))
+
+	for i := 80; i < 256; i++ {
+		fish = spawn(fish)
+	}
+
+	fmt.Printf("part 2: %v\n", count(fish))
 }
 
 func count(fish map[int]int) int {
