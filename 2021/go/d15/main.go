@@ -67,11 +67,7 @@ func fillMap(target [][]int, px int, py int, source [][]int) {
 	width := len(source[0])
 	for y, row := range source {
 		for x, risk := range row {
-			risk = risk + px + py
-			for risk > 9 {
-				risk -= 9
-			}
-			target[py*height+y][px*width+x] = risk
+			target[py*height+y][px*width+x] = (risk+px+py-1)%9 + 1 // if over 9 rotate to 1
 		}
 	}
 }

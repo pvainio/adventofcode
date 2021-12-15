@@ -72,11 +72,7 @@ public class D15 {
         int width = source[height-1].length;
         for(int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                int risk = source[y][x] + px + py;
-                while(risk > 9) {
-                    risk -= 9;
-                }
-                target[py*height + y][px*width+x] = risk;
+                target[py*height + y][px*width+x] = (source[y][x] + px + py -1) % 9 + 1; // if over 9, rotate to 1
             }
         }
     }
