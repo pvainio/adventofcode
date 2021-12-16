@@ -17,7 +17,6 @@ public class D16 {
 
     interface Packet {
         int version();
-        int type();
         long value();
     }
 
