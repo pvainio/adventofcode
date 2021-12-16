@@ -11,7 +11,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
- * Advent of Code (AOC) 2021 Day 15
+ * Advent of Code (AOC) 2021 Day 16
  */
 public class D16 {
 
