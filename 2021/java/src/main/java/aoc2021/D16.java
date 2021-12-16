@@ -24,7 +24,7 @@ public class D16 {
 
     record OperatorPacket(int version, int type, List<Packet> packets) implements Packet {
         public long value() {
-            return switch (type) {
+            return switch (type) { // calculate packet value by type
                 case 0 -> packets.stream().mapToLong(p -> p.value()).sum();
                 case 1 -> packets.stream().mapToLong(p -> p.value()).reduce(1, (a,b) -> a*b); 
                 case 2 -> packets.stream().mapToLong(p -> p.value()).min().getAsLong();
@@ -61,27 +61,18 @@ public class D16 {
 
     static Packet parseOperatorPacket(int version, int type, CharBuffer in) {
         int lengthType = getBits(in, 1);
-        if (lengthType == 0) {
-            return parsePacketsLength(version, type, in);
-        } else {
-            return parsePacketsNumber(version, type, in);
+        if (lengthType == 0) { // lengthType 0 mean sub packets by bit length
+            int len = getBits(in, 15); // next 15 bits is the number of bits to read
+            int start = in.position();
+            var packets = Stream.iterate(0, i -> in.position() - start < len, (a) -> 0) // iterate unti len consumed
+                .map(i -> parsePacket(in))
+                .toList();
+            return new OperatorPacket(version, type, packets);
+        } else { // lengthType 1 -> sub packets by numbers
+            int number = getBits(in, 11); // next 11 bit is the number of packets to read
+            var packets = IntStream.range(0, number).mapToObj(i -> parsePacket(in)).toList();
+            return new OperatorPacket(version, type, packets);
         }
-    }
-
-    static Packet parsePacketsLength(int version, int type, CharBuffer in) {
-        int length = getBits(in, 15);
-        int start = in.position();
-        // parse packets until length consumed
-        var packets = Stream.iterate(0, i -> in.position() - start < length, (a) -> 0)
-            .map(i -> parsePacket(in))
-            .toList();
-        return new OperatorPacket(version, type, packets);
-    }
-
-    static Packet parsePacketsNumber(int version, int type, CharBuffer in) {
-        int number = getBits(in, 11);
-        var packets = IntStream.range(0, number).mapToObj(i -> parsePacket(in)).toList();
-        return new OperatorPacket(version, type, packets);
     }
 
     static Packet parseLiteralPacket(int version, int type, CharBuffer in) {

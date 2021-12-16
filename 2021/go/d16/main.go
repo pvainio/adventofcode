@@ -29,14 +29,12 @@ type operatorPacket struct {
 
 // Advent of Code (AOC) 2021 Day 16
 func main() {
-
 	var data string
 	util.ReadFile("../input/16a.txt", func(line string) {
 		data = asBits(line)
 	})
 
 	in := bytes.NewBufferString(data)
-
 	p := parsePacket(in)
 
 	fmt.Printf("part 1: %v\n", p.version())
