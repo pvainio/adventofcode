@@ -55,10 +55,10 @@ func parsePacket(in *bytes.Buffer) packet {
 
 func parseLiteral(header packetHeader, in *bytes.Buffer) packet {
 	var value int = 0
-	groupPrefix := 0
-	for ok := true; ok; ok = groupPrefix == 1 {
+	groupPrefix := 1
+	for groupPrefix == 1 {
 		groupPrefix = getBits(in, 1)
-		value = (value << 4) + getBits(in, 4)
+		value = (value << 4) + getBits(in, 4) // add next group of bits to the end
 	}
 	return literalPacket{header: header, literal: value}
 }
@@ -66,13 +66,13 @@ func parseLiteral(header packetHeader, in *bytes.Buffer) packet {
 func parseOperator(header packetHeader, in *bytes.Buffer) packet {
 	lengthType := getBits(in, 1)
 	packets := []packet{}
-	if lengthType == 0 {
+	if lengthType == 0 { // lentype 0 specifies the number of bits to include
 		length := getBits(in, 15)
 		startLen := in.Len()
 		for startLen-in.Len() < length {
 			packets = append(packets, parsePacket(in))
 		}
-	} else {
+	} else { // lentype 1 specifies the number of packets to include
 		number := getBits(in, 11)
 		for i := 0; i < number; i++ {
 			packets = append(packets, parsePacket(in))
@@ -86,11 +86,11 @@ func (p literalPacket) version() int {
 }
 
 func (p operatorPacket) version() int {
-	subVersion := 0
-	for _, p := range p.packets {
+	subVersion := p.header.version
+	for _, p := range p.packets { // loop subpackets to add versions
 		subVersion += p.version()
 	}
-	return p.header.version + subVersion
+	return subVersion
 }
 
 func (p literalPacket) value() int {
@@ -98,11 +98,15 @@ func (p literalPacket) value() int {
 }
 
 func (p operatorPacket) value() int {
-	reducer := reducerFn[p.header.typeId]
-	return p.reduce(reducer)
+	reducerFunc := reducerFunc[p.header.typeId] // get reducer func from map by type
+	value := p.packets[0].value()               // first subpacket value
+	for _, subPacket := range p.packets[1:] {   // apply reducer for rest of the subpackets
+		value = reducerFunc(value, subPacket.value())
+	}
+	return value
 }
 
-var reducerFn = map[int]func(a int, b int) int{
+var reducerFunc = map[int]func(a int, b int) int{
 	0: func(a int, b int) int { return a + b },                // 0 -> sum
 	1: func(a int, b int) int { return a * b },                // 1 -> product
 	2: func(a int, b int) int { return ifElse(a < b, a, b) },  // 2 -> min
@@ -118,18 +122,6 @@ func ifElse(v bool, ifTrue int, ifFalse int) int {
 	} else {
 		return ifFalse
 	}
-}
-
-func (p operatorPacket) reduce(fn func(a int, b int) int) int {
-	value := 0
-	for pos, p := range p.packets {
-		if pos == 0 {
-			value = p.value()
-		} else {
-			value = fn(value, p.value())
-		}
-	}
-	return value
 }
 
 func getBits(in *bytes.Buffer, len int) int {
