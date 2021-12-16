@@ -11,7 +11,7 @@ import (
 
 type packet interface {
 	version() int
-	value() int64
+	value() int
 }
 
 type packetHeader struct {
@@ -94,32 +94,32 @@ func (p operatorPacket) version() int {
 	return p.header.version + subVersion
 }
 
-func (p literalPacket) value() int64 {
-	return int64(p.literal)
+func (p literalPacket) value() int {
+	return p.literal
 }
 
-func (p operatorPacket) value() int64 {
+func (p operatorPacket) value() int {
 	switch p.header.typeId {
 	case 0:
-		return p.reduce(0, func(a int64, b int64) int64 { return a + b })
+		return p.reduce(0, func(a int, b int) int { return a + b })
 	case 1:
-		return p.reduce(1, func(a int64, b int64) int64 { return a * b })
+		return p.reduce(1, func(a int, b int) int { return a * b })
 	case 2:
-		return p.reduce(math.MaxInt64, func(a int64, b int64) int64 { return min(a, b) })
+		return p.reduce(math.MaxInt, func(a int, b int) int { return min(a, b) })
 	case 3:
-		return p.reduce(math.MinInt64, func(a int64, b int64) int64 { return max(a, b) })
+		return p.reduce(math.MinInt, func(a int, b int) int { return max(a, b) })
 	case 5:
-		return p.cmpSub(func(a int64, b int64) bool { return a > b })
+		return p.cmpSub(func(a int, b int) bool { return a > b })
 	case 6:
-		return p.cmpSub(func(a int64, b int64) bool { return a < b })
+		return p.cmpSub(func(a int, b int) bool { return a < b })
 	case 7:
-		return p.cmpSub(func(a int64, b int64) bool { return a == b })
+		return p.cmpSub(func(a int, b int) bool { return a == b })
 	default:
 		return -1
 	}
 }
 
-func (p operatorPacket) cmpSub(fn func(a int64, b int64) bool) int64 {
+func (p operatorPacket) cmpSub(fn func(a int, b int) bool) int {
 	if fn(p.packets[0].value(), p.packets[1].value()) {
 		return 1
 	} else {
@@ -127,14 +127,14 @@ func (p operatorPacket) cmpSub(fn func(a int64, b int64) bool) int64 {
 	}
 }
 
-func (p operatorPacket) reduce(value int64, fn func(a int64, b int64) int64) int64 {
+func (p operatorPacket) reduce(value int, fn func(a int, b int) int) int {
 	for _, p := range p.packets {
 		value = fn(value, p.value())
 	}
 	return value
 }
 
-func min(a int64, b int64) int64 {
+func min(a int, b int) int {
 	if a < b {
 		return a
 	} else {
@@ -142,7 +142,7 @@ func min(a int64, b int64) int64 {
 	}
 }
 
-func max(a int64, b int64) int64 {
+func max(a int, b int) int {
 	if a > b {
 		return a
 	} else {
