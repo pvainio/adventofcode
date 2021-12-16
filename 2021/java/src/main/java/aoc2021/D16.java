@@ -95,9 +95,6 @@ public class D16 {
     }
 
     static int getBits(CharBuffer in, int len) {
-        if (in.remaining() < len) {
-            return -1;
-        }
         String bits = in.subSequence(0, len).toString();
         in.position(in.position()+len);
         return Integer.parseInt(bits, 2);
@@ -106,10 +103,7 @@ public class D16 {
     static String asBits(String hexString) {
         return hexString.chars()
             .map(c -> HexFormat.fromHexDigit(c))
-            .mapToObj(h -> asBits(h, 4)).collect(Collectors.joining(""));
-    }
-
-    static String asBits(int value, int len) {
-        return String.format("%4s", Integer.toString(value, 2)).replace(' ', '0');
+            .mapToObj(h -> String.format("%4s", Integer.toString(h, 2)).replace(' ', '0'))
+            .collect(Collectors.joining(""));
     }
 }
