@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 )
 
 type packet interface {
@@ -184,9 +185,5 @@ func asBits(hex string) string {
 
 func hexToBits(hex rune) string {
 	v, _ := strconv.ParseInt(string(hex), 16, 8)
-	res := strconv.FormatInt(v, 2)
-	for len(res) < 4 {
-		res = "0" + res
-	}
-	return res
+	return strings.ReplaceAll(fmt.Sprintf("%4s", strconv.FormatInt(v, 2)), " ", "0")
 }

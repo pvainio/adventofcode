@@ -111,10 +111,6 @@ public class D16 {
     }
 
     static String asBits(int value, int len) {
-        String str = Integer.toString(value, 2);
-        while (str.length() < len) {
-            str = "0" + str;
-        }
-        return str;
+        return String.format("%4s", Integer.toString(value, 2)).replace(' ', '0');
     }
 }
