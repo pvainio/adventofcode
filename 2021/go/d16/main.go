@@ -10,9 +10,8 @@ import (
 )
 
 type packet interface {
-	head() packetHeader
 	version() int
-	content() int64
+	value() int64
 }
 
 type packetHeader struct {
@@ -20,8 +19,8 @@ type packetHeader struct {
 }
 
 type literalPacket struct {
-	header packetHeader
-	value  int
+	header  packetHeader
+	literal int
 }
 
 type operatorPacket struct {
@@ -42,7 +41,7 @@ func main() {
 	p := parsePacket(in)
 
 	fmt.Printf("part 1: %v\n", p.version())
-	fmt.Printf("part 2: %v\n", p.content())
+	fmt.Printf("part 2: %v\n", p.value())
 }
 
 func parsePacket(in *bytes.Buffer) packet {
@@ -62,43 +61,25 @@ func parseLiteral(header packetHeader, in *bytes.Buffer) packet {
 		groupPrefix = getBits(in, 1)
 		value = (value << 4) + getBits(in, 4)
 	}
-	return literalPacket{header: header, value: value}
+	return literalPacket{header: header, literal: value}
 }
 
 func parseOperator(header packetHeader, in *bytes.Buffer) packet {
 	lengthType := getBits(in, 1)
+	packets := []packet{}
 	if lengthType == 0 {
-		return parsePacketsLength(header, in)
+		length := getBits(in, 15)
+		startLen := in.Len()
+		for startLen-in.Len() < length {
+			packets = append(packets, parsePacket(in))
+		}
 	} else {
-		return parsePacketsNumber(header, in)
-	}
-}
-
-func parsePacketsLength(header packetHeader, in *bytes.Buffer) packet {
-	length := getBits(in, 15)
-	startLen := in.Len()
-	packets := []packet{}
-	for startLen-in.Len() < length {
-		packets = append(packets, parsePacket(in))
+		number := getBits(in, 11)
+		for i := 0; i < number; i++ {
+			packets = append(packets, parsePacket(in))
+		}
 	}
 	return operatorPacket{header: header, packets: packets}
-}
-
-func parsePacketsNumber(header packetHeader, in *bytes.Buffer) packet {
-	number := getBits(in, 11)
-	packets := []packet{}
-	for i := 0; i < number; i++ {
-		packets = append(packets, parsePacket(in))
-	}
-	return operatorPacket{header: header, packets: packets}
-}
-
-func (p literalPacket) head() packetHeader {
-	return p.header
-}
-
-func (p operatorPacket) head() packetHeader {
-	return p.header
 }
 
 func (p literalPacket) version() int {
@@ -113,42 +94,42 @@ func (p operatorPacket) version() int {
 	return p.header.version + subVersion
 }
 
-func (p literalPacket) content() int64 {
-	return int64(p.value)
+func (p literalPacket) value() int64 {
+	return int64(p.literal)
 }
 
-func (p operatorPacket) content() int64 {
+func (p operatorPacket) value() int64 {
 	switch p.header.typeId {
 	case 0:
-		return reduce(p.packets, 0, func(a int64, b int64) int64 { return a + b })
+		return p.reduce(0, func(a int64, b int64) int64 { return a + b })
 	case 1:
-		return reduce(p.packets, 1, func(a int64, b int64) int64 { return a * b })
+		return p.reduce(1, func(a int64, b int64) int64 { return a * b })
 	case 2:
-		return reduce(p.packets, math.MaxInt64, func(a int64, b int64) int64 { return min(a, b) })
+		return p.reduce(math.MaxInt64, func(a int64, b int64) int64 { return min(a, b) })
 	case 3:
-		return reduce(p.packets, math.MinInt64, func(a int64, b int64) int64 { return max(a, b) })
+		return p.reduce(math.MinInt64, func(a int64, b int64) int64 { return max(a, b) })
 	case 5:
-		return compare(p.packets, func(a int64, b int64) bool { return a > b })
+		return p.cmpSub(func(a int64, b int64) bool { return a > b })
 	case 6:
-		return compare(p.packets, func(a int64, b int64) bool { return a < b })
+		return p.cmpSub(func(a int64, b int64) bool { return a < b })
 	case 7:
-		return compare(p.packets, func(a int64, b int64) bool { return a == b })
+		return p.cmpSub(func(a int64, b int64) bool { return a == b })
 	default:
 		return -1
 	}
 }
 
-func compare(packets []packet, fn func(a int64, b int64) bool) int64 {
-	if fn(packets[0].content(), packets[1].content()) {
+func (p operatorPacket) cmpSub(fn func(a int64, b int64) bool) int64 {
+	if fn(p.packets[0].value(), p.packets[1].value()) {
 		return 1
 	} else {
 		return 0
 	}
 }
 
-func reduce(packets []packet, value int64, fn func(a int64, b int64) int64) int64 {
-	for _, p := range packets {
-		value = fn(value, p.content())
+func (p operatorPacket) reduce(value int64, fn func(a int64, b int64) int64) int64 {
+	for _, p := range p.packets {
+		value = fn(value, p.value())
 	}
 	return value
 }
