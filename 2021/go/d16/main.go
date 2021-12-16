@@ -4,7 +4,6 @@ import (
 	"aoc2021/util"
 	"bytes"
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
 )
@@ -99,55 +98,38 @@ func (p literalPacket) value() int {
 }
 
 func (p operatorPacket) value() int {
-	switch p.header.typeId {
-	case 0:
-		return p.reduce(0, func(a int, b int) int { return a + b })
-	case 1:
-		return p.reduce(1, func(a int, b int) int { return a * b })
-	case 2:
-		return p.reduce(math.MaxInt, func(a int, b int) int { return min(a, b) })
-	case 3:
-		return p.reduce(math.MinInt, func(a int, b int) int { return max(a, b) })
-	case 5:
-		return p.cmpSub(func(a int, b int) bool { return a > b })
-	case 6:
-		return p.cmpSub(func(a int, b int) bool { return a < b })
-	case 7:
-		return p.cmpSub(func(a int, b int) bool { return a == b })
-	default:
-		return -1
-	}
+	reducer := reducerFn[p.header.typeId]
+	return p.reduce(reducer)
 }
 
-func (p operatorPacket) cmpSub(fn func(a int, b int) bool) int {
-	if fn(p.packets[0].value(), p.packets[1].value()) {
-		return 1
+var reducerFn = map[int]func(a int, b int) int{
+	0: func(a int, b int) int { return a + b },                // 0 -> sum
+	1: func(a int, b int) int { return a * b },                // 1 -> product
+	2: func(a int, b int) int { return ifElse(a < b, a, b) },  // 2 -> min
+	3: func(a int, b int) int { return ifElse(a > b, a, b) },  // 3 -> max
+	5: func(a int, b int) int { return ifElse(a > b, 1, 0) },  // 5 -> if greater 1 else 0
+	6: func(a int, b int) int { return ifElse(a < b, 1, 0) },  // 6 -> if less 1 else 0
+	7: func(a int, b int) int { return ifElse(a == b, 1, 0) }, // 8 -> if equal 1 else 0
+}
+
+func ifElse(v bool, ifTrue int, ifFalse int) int {
+	if v {
+		return ifTrue
 	} else {
-		return 0
+		return ifFalse
 	}
 }
 
-func (p operatorPacket) reduce(value int, fn func(a int, b int) int) int {
-	for _, p := range p.packets {
-		value = fn(value, p.value())
+func (p operatorPacket) reduce(fn func(a int, b int) int) int {
+	value := 0
+	for pos, p := range p.packets {
+		if pos == 0 {
+			value = p.value()
+		} else {
+			value = fn(value, p.value())
+		}
 	}
 	return value
-}
-
-func min(a int, b int) int {
-	if a < b {
-		return a
-	} else {
-		return b
-	}
-}
-
-func max(a int, b int) int {
-	if a > b {
-		return a
-	} else {
-		return b
-	}
 }
 
 func getBits(in *bytes.Buffer, len int) int {
