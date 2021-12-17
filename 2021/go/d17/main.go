@@ -51,7 +51,7 @@ func shoot(probe Probe, target Area) Probe {
 }
 
 func (p Probe) move() Probe {
-	return Probe{p.x + p.xv, p.y + p.yv, math.Max(0, p.xv-1), p.yv - 1, math.Max(p.maxHeight, p.y)}
+	return Probe{p.x + p.xv, p.y + p.yv, math.Max(0, p.xv-1), p.yv - 1, math.Max(p.maxHeight, p.y+p.yv)}
 }
 
 func (p Probe) hit(target Area) bool {

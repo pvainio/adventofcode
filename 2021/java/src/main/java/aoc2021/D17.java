@@ -15,7 +15,7 @@ public class D17 {
     record Area(int x1, int x2, int y1, int y2) {}
     record Probe(int x, int y, int xv, int yv, int maxHeight) {
         Probe move() {
-            return new Probe(x+xv, y+yv, Math.max(0, xv-1), yv - 1, Math.max(maxHeight, y));
+            return new Probe(x+xv, y+yv, Math.max(0, xv-1), yv - 1, Math.max(maxHeight, y+yv));
         }
         boolean hit(Area target) {
             return x >= target.x1 && x <= target.x2 && y <= target.y1 && y >= target.y2;
