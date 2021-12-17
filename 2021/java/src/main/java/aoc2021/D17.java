@@ -41,7 +41,7 @@ public class D17 {
     }
 
     static Probe shoot(int xv, int yv, Area target) {
-        return Stream.iterate(new Probe(0, 0, xv, yv, 0), p -> p.move()) // iterate probe moves
+        return Stream.iterate(new Probe(0, 0, xv, yv, 0), Probe::move) // iterate probe moves
             .dropWhile(p -> !p.hit(target) && !p.miss(target)) // until hit or miss
             .findFirst().get();
     }

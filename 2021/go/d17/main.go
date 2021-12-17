@@ -3,33 +3,38 @@ package main
 import (
 	"aoc2021/util"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
 
-type area struct {
-	x1, x2, y1, y2 int
+type Area struct {
+	x1, x2, y1, y2 float64
+}
+
+type Probe struct {
+	x, y, xv, yv, maxHeight float64
 }
 
 // Advent of Code (AOC) 2021 Day 17
 func main() {
 
-	var target area
+	var target Area
 	util.ReadFile("../input/17a.txt", func(line string) {
 		parts := strings.Split(line[len("target area:"):], ",")
 		target.x1, target.x2 = parseLimit(parts[0])
 		target.y2, target.y1 = parseLimit(parts[1])
 	})
 
-	maxHeight := 0
-	hits := 0
+	hits := 0.
+	maxHeight := 0.
 
-	for xv := 0; xv <= target.x2; xv++ { // iterate x velocity from 0 to limit
+	for xv := 0.; xv <= target.x2; xv++ { // iterate x velocity from 0 to limit
 		for yv := target.y2; yv < 1000; yv++ { // iterate y velocity from y limit
-			hit, height := shoot(xv, yv, target)
-			if hit {
+			probe := shoot(Probe{xv: xv, yv: yv}, target)
+			if probe.hit(target) { // count only hits
 				hits++
-				maxHeight = max(maxHeight, height)
+				maxHeight = math.Max(maxHeight, probe.maxHeight)
 			}
 		}
 	}
@@ -38,32 +43,28 @@ func main() {
 	fmt.Printf("part 2: %v\n", hits)
 }
 
-func shoot(xv int, yv int, target area) (bool, int) {
-	var x, y, maxHeight int
-	for {
-		x, y = x+xv, y+yv
-		xv, yv = max(0, xv-1), yv-1
-		maxHeight = max(maxHeight, y)
-
-		if x >= target.x1 && x <= target.x2 && y <= target.y1 && y >= target.y2 {
-			return true, maxHeight
-		} else if y < target.y2 || x > target.x2 {
-			return false, 0
-		}
+func shoot(probe Probe, target Area) Probe {
+	for !probe.miss(target) && !probe.hit(target) {
+		probe = probe.move() // move until hit or miss
 	}
+	return probe
 }
 
-func max(a int, b int) int {
-	if a > b {
-		return a
-	} else {
-		return b
-	}
+func (p Probe) move() Probe {
+	return Probe{p.x + p.xv, p.y + p.yv, math.Max(0, p.xv-1), p.yv - 1, math.Max(p.maxHeight, p.y)}
 }
 
-func parseLimit(part string) (int, int) {
+func (p Probe) hit(target Area) bool {
+	return p.x >= target.x1 && p.x <= target.x2 && p.y <= target.y1 && p.y >= target.y2
+}
+
+func (p Probe) miss(target Area) bool {
+	return p.y < target.y2 || p.x > target.x2
+}
+
+func parseLimit(part string) (float64, float64) {
 	parts := strings.Split(part[3:], "..")
-	start, _ := strconv.Atoi(parts[0])
-	end, _ := strconv.Atoi(parts[1])
+	start, _ := strconv.ParseFloat(parts[0], 32)
+	end, _ := strconv.ParseFloat(parts[1], 32)
 	return start, end
 }
