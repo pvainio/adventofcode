@@ -3,28 +3,21 @@ package aoc2021;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.stream.Stream;
+import java.util.regex.Pattern;
 
 /**
  * Advent of Code (AOC) 2021 Day 17
  */
 public class D17 {
 
-    record Area(int x1, int y1, int x2, int y2) {
-        static Area parse(String xStr, String yStr) {
-            int[] x = Stream.of(xStr.substring(3).split("\\.\\.")).mapToInt(Integer::parseInt).toArray();
-            int[] y = Stream.of(yStr.substring(3).split("\\.\\.")).mapToInt(Integer::parseInt).toArray();            
-            return new Area(x[0],y[1],x[1],y[0]);
-        }
-    }
-
+    record Area(int x1, int x2, int y1, int y2) {}
     record ShotResult(boolean hit, int maxY){}
 
     public static void main(String... args) throws IOException {
-
-        Area target = Files.lines(Path.of("../input/17a.txt"))
-            .map(l -> l.substring("target area:".length()).split(","))
-            .map(parts -> Area.parse(parts[0], parts[1])).findFirst().get();
+        int[] numbers = Pattern.compile("(-?\\d+)")
+            .matcher(Files.readString(Path.of("../input/17a.txt"))).results()
+            .mapToInt(mr -> Integer.parseInt(mr.group(1))).toArray();
+        Area target = new Area(numbers[0], numbers[1], numbers[3], numbers[2]);
 
         int hits = 0;
         int maxHeight = 0;
