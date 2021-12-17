@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 /**
  * Advent of Code (AOC) 2021 Day 17
@@ -11,7 +12,7 @@ import java.util.regex.Pattern;
 public class D17 {
 
     record Area(int x1, int x2, int y1, int y2) {}
-    record ShotResult(boolean hit, int maxY){}
+    record ShotResult(boolean hit, int maxHeight) {}
 
     public static void main(String... args) throws IOException {
         int[] numbers = Pattern.compile("(-?\\d+)")
@@ -19,21 +20,13 @@ public class D17 {
             .mapToInt(mr -> Integer.parseInt(mr.group(1))).toArray();
         Area target = new Area(numbers[0], numbers[1], numbers[3], numbers[2]);
 
-        int hits = 0;
-        int maxHeight = 0;
+        var hits = IntStream.rangeClosed(0, target.x2).boxed() // iterate x velocities
+            .flatMap(xv -> IntStream.range(target.y2, 1000) // and y velocitios
+                .mapToObj(yv -> shoot(xv, yv, target))) // shoot each x,y
+            .filter(r -> r.hit()).toList(); // collect hits to list
 
-        for (int xv = 0; xv <= target.x2; xv++) {
-            for (int yv = target.y2; yv < 1000;yv++) {
-                ShotResult res = shoot(xv, yv, target);
-                if (res.hit) {
-                    hits++;
-                    maxHeight = Math.max(maxHeight, res.maxY);
-                }
-            }
-        }
-
-        System.out.printf("part 1: %d\n", maxHeight);
-        System.out.printf("part 2: %d\n", hits);
+        System.out.printf("part 1: %d\n", hits.stream().mapToInt(i -> i.maxHeight).max().getAsInt());
+        System.out.printf("part 2: %d\n", hits.size());
     }
 
     static ShotResult shoot(int xv, int yv, Area target) {
