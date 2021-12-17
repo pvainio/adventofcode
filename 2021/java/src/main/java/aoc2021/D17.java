@@ -29,7 +29,7 @@ public class D17 {
 
         int hits = 0;
         int maxHeight = 0;
-        
+
         xloop:
         for (int xv = 0; xv <= target.x2; xv++) {
             for (int yv = target.y2;;yv++) {
@@ -48,31 +48,24 @@ public class D17 {
     }
 
     static ShotResult shoot(int xv, int yv, Area target) {
-        StepResult prev = null;
-        for (int step = 1; ; step++) {
-            StepResult res = atStep(step, xv, yv);
-            if (res.x >= target.x1 && res.x <= target.x2 && res.y <= target.y1 && res.y >= target.y2) {
-                return new ShotResult(Hit.HIT, res.maxY);
-            } else if (res.y < target.y2 && prev.y > target.y1 && prev.y-res.y > (target.y1-target.y2)*2) {
-                return new ShotResult(Hit.YVELOCITY_HIGH, 0); // y velocity so high it missing the target withing one step
-            } else if (res.x > target.x2) {
-                return new ShotResult(Hit.LONG, 0);
-            } else if (res.y < target.y2) {
-                return new ShotResult(Hit.SHORT, 0);
-            }
-            prev = res;
-        }
-    }
-
-    static StepResult atStep(int steps, int xv, int yv) {
-        int x = 0, y = 0, maxHeight = 0;
-        for (int step = 0; step < steps; step++) {
+        int x = 0, y = 0, prevY = 0, maxHeight = 0;
+        while (true) {
             x += xv;
             y += yv;
             xv = xv > 0 ? xv - 1 : 0;
             yv = yv - 1;
             maxHeight = maxHeight < y ? y : maxHeight;
+
+            if (x >= target.x1 && x <= target.x2 && y <= target.y1 && y >= target.y2) {
+                return new ShotResult(Hit.HIT, maxHeight); // Hit target
+            } else if (y < target.y2 && prevY > target.y1 && prevY-y > (target.y1-target.y2)*2) {
+                return new ShotResult(Hit.YVELOCITY_HIGH, 0); // y velocity so high it missing the target withing one step
+            } else if (x > target.x2) {
+                return new ShotResult(Hit.LONG, 0); // Went too long
+            } else if (y < target.y2) {
+                return new ShotResult(Hit.SHORT, 0);
+            }
+            prevY = y;
         }
-        return new StepResult(x, y, maxHeight);
     }
 }

@@ -56,9 +56,19 @@ const (
 )
 
 func shoot(xv int, yv int, target area) (int, int) {
-	var prev xy
+	var pos, prev xy
+	var maxHeight int
 	for step := 1; ; step++ {
-		pos, maxHeight := positionAtStep(step, xy{x: xv, y: yv})
+		pos.x += xv
+		pos.y += yv
+		if xv > 0 {
+			xv -= 1
+		}
+		yv -= 1
+		if pos.y > maxHeight {
+			maxHeight = pos.y
+		}
+
 		if pos.x >= target.start.x && pos.x <= target.end.x && pos.y <= target.start.y && pos.y >= target.end.y {
 			return HIT, maxHeight
 		} else if pos.y < target.end.y && prev.y > target.start.y && prev.y-pos.y > (target.start.y-target.end.y)*2 {
@@ -70,23 +80,6 @@ func shoot(xv int, yv int, target area) (int, int) {
 		}
 		prev = pos
 	}
-}
-
-func positionAtStep(step int, vel xy) (xy, int) {
-	pos := xy{}
-	maxHeight := 0
-	for i := 0; i < step; i++ {
-		pos.x += vel.x
-		pos.y += vel.y
-		if vel.x > 0 {
-			vel.x -= 1
-		}
-		vel.y -= 1
-		if pos.y > maxHeight {
-			maxHeight = pos.y
-		}
-	}
-	return pos, maxHeight
 }
 
 func parseLimit(part string) (int, int) {
