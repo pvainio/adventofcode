@@ -17,7 +17,7 @@ public class D17 {
             return new Area(x[0],y[1],x[1],y[0]);
         }
     }
-    record StepResult(int x, int y, int maxY){}
+
     enum Hit {HIT, YVELOCITY_HIGH, LONG, SHORT}
     record ShotResult(Hit hit, int maxY){}
 
