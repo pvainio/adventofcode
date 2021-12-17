@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Advent of Code (AOC) 2021 Day 17
@@ -12,7 +13,17 @@ import java.util.stream.IntStream;
 public class D17 {
 
     record Area(int x1, int x2, int y1, int y2) {}
-    record ShotResult(boolean hit, int maxHeight) {}
+    record Probe(int x, int y, int xv, int yv, int maxHeight) {
+        Probe move() {
+            return new Probe(x+xv, y+yv, Math.max(0, xv-1), yv - 1, Math.max(maxHeight, y));
+        }
+        boolean hit(Area target) {
+            return x >= target.x1 && x <= target.x2 && y <= target.y1 && y >= target.y2;
+        }
+        boolean miss(Area target) {
+            return x > target.x2 || y < target.y2;
+        }
+    }
 
     public static void main(String... args) throws IOException {
         int[] numbers = Pattern.compile("(-?\\d+)")
@@ -23,26 +34,15 @@ public class D17 {
         var hits = IntStream.rangeClosed(0, target.x2).boxed() // iterate x velocities
             .flatMap(xv -> IntStream.range(target.y2, 1000) // and y velocitios
                 .mapToObj(yv -> shoot(xv, yv, target))) // shoot each x,y
-            .filter(r -> r.hit()).toList(); // collect hits to list
+            .filter(r -> r.hit(target)).toList(); // collect hits to list
 
         System.out.printf("part 1: %d\n", hits.stream().mapToInt(i -> i.maxHeight).max().getAsInt());
         System.out.printf("part 2: %d\n", hits.size());
     }
 
-    static ShotResult shoot(int xv, int yv, Area target) {
-        int x = 0, y = 0, maxHeight = 0;
-        while (true) {
-            x += xv;
-            y += yv;
-            xv = Math.max(0, xv-1);
-            yv = yv - 1;
-            maxHeight = Math.max(maxHeight, y);
-
-            if (x >= target.x1 && x <= target.x2 && y <= target.y1 && y >= target.y2) {
-                return new ShotResult(true, maxHeight); // Hit target
-            } else if (x > target.x2 || y < target.y2) {
-                return new ShotResult(false, 0); // Miss
-            } 
-        }
+    static Probe shoot(int xv, int yv, Area target) {
+        return Stream.iterate(new Probe(0, 0, xv, yv, 0), p -> p.move()) // iterate probe moves
+            .dropWhile(p -> !p.hit(target) && !p.miss(target)) // until hit or miss
+            .findFirst().get();
     }
 }
