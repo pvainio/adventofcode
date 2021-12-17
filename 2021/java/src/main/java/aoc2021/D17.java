@@ -18,8 +18,7 @@ public class D17 {
         }
     }
 
-    enum Hit {HIT, YVELOCITY_HIGH, LONG, SHORT}
-    record ShotResult(Hit hit, int maxY){}
+    record ShotResult(boolean hit, int maxY){}
 
     public static void main(String... args) throws IOException {
 
@@ -30,15 +29,12 @@ public class D17 {
         int hits = 0;
         int maxHeight = 0;
 
-        xloop:
         for (int xv = 0; xv <= target.x2; xv++) {
-            for (int yv = target.y2;;yv++) {
+            for (int yv = target.y2; yv < 1000;yv++) {
                 ShotResult res = shoot(xv, yv, target);
-                if (res.hit == Hit.HIT) {
+                if (res.hit) {
                     hits++;
-                    maxHeight = res.maxY > maxHeight ? res.maxY : maxHeight;
-                } else if (res.hit == Hit.YVELOCITY_HIGH || res.hit == Hit.LONG) {
-                    continue xloop;
+                    maxHeight = Math.max(maxHeight, res.maxY);
                 }
             }
         }
@@ -48,24 +44,19 @@ public class D17 {
     }
 
     static ShotResult shoot(int xv, int yv, Area target) {
-        int x = 0, y = 0, prevY = 0, maxHeight = 0;
+        int x = 0, y = 0, maxHeight = 0;
         while (true) {
             x += xv;
             y += yv;
-            xv = xv > 0 ? xv - 1 : 0;
+            xv = Math.max(0, xv-1);
             yv = yv - 1;
-            maxHeight = maxHeight < y ? y : maxHeight;
+            maxHeight = Math.max(maxHeight, y);
 
             if (x >= target.x1 && x <= target.x2 && y <= target.y1 && y >= target.y2) {
-                return new ShotResult(Hit.HIT, maxHeight); // Hit target
-            } else if (y < target.y2 && prevY > target.y1 && prevY-y > (target.y1-target.y2)*2) {
-                return new ShotResult(Hit.YVELOCITY_HIGH, 0); // y velocity so high it missing the target withing one step
-            } else if (x > target.x2) {
-                return new ShotResult(Hit.LONG, 0); // Went too long
-            } else if (y < target.y2) {
-                return new ShotResult(Hit.SHORT, 0);
-            }
-            prevY = y;
+                return new ShotResult(true, maxHeight); // Hit target
+            } else if (x > target.x2 || y < target.y2) {
+                return new ShotResult(false, 0); // Miss
+            } 
         }
     }
 }
