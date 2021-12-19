@@ -49,9 +49,10 @@ public class D19 {
                 .split("--- scanner \\d+ ---")).filter(s -> !s.isBlank())
                 .map(s -> parseScanner(s)).toList();
 
-        List<Scanner> aligned = align(scanners);
+        List<Scanner> aligned = align(scanners); // align all scanners
 
-        Set<Vector> beacons = aligned.stream().flatMap(s -> s.beacons.stream()).collect(Collectors.toSet());
+        Set<Vector> beacons = aligned.stream() // collect all beacons 
+            .flatMap(s -> s.beacons.stream()).collect(Collectors.toSet());
         System.out.printf("part 1: %s\n", beacons.size());
 
         int maxDistance = aligned.stream().flatMapToInt(a -> aligned.stream()
@@ -85,19 +86,21 @@ public class D19 {
 
     // Calculate vector to align S2 with S1 and null if not possible
     static Vector calculateAlignVector(Scanner s1, Scanner s2) {
-        List<Vector> betweenS1S2Beacons = s1.beacons.stream()
+        List<Vector> betweenS1S2Beacons = s1.beacons.stream() // All vectors between s1 and s2 beacons
             .flatMap(b1 -> s2.beacons().stream().filter(b2 -> b1 != b2).map(b2 -> b1.vector(b2))).toList();
 
+        // Count number of distances for each axis
         Map<Integer,Long> x = betweenS1S2Beacons.stream().collect(Collectors.groupingBy(v -> v.x, Collectors.counting()));
         Map<Integer,Long> y = betweenS1S2Beacons.stream().collect(Collectors.groupingBy(v -> v.y, Collectors.counting()));
         Map<Integer,Long> z = betweenS1S2Beacons.stream().collect(Collectors.groupingBy(v -> v.z, Collectors.counting()));
 
+        // Get max max number of distances for each axis
         Map.Entry<Integer,Long> xMax = x.entrySet().stream().max((a,b) -> (int)(a.getValue()-b.getValue())).get();
         Map.Entry<Integer,Long> yMax = y.entrySet().stream().max((a,b) -> (int)(a.getValue()-b.getValue())).get();
         Map.Entry<Integer,Long> zMax = z.entrySet().stream().max((a,b) -> (int)(a.getValue()-b.getValue())).get();
 
         int minCount = Stream.of(xMax.getValue(), yMax.getValue(), zMax.getValue()).mapToInt(i -> i.intValue()).min().getAsInt();
-        if (minCount >= 12) {
+        if (minCount >= 12) { // 12 or more same distances for each axis
             return new Vector(xMax.getKey(), yMax.getKey(), zMax.getKey());
         } else {
             return null;
@@ -106,16 +109,19 @@ public class D19 {
 
     // Produce all possible orientations of Scanner
     static Stream<Scanner> orientations(Scanner s) {
+        return rotateMatrix(rotateMatrix(rotateMatrix(Stream.of(s), X), Y), Z); // rotate through all axis
+    }
+
+    // Produce all variations of scanners rotated with given rotation matrix
+    static Stream<Scanner> rotateMatrix(Stream<Scanner> scanners, int[][] rm) {
+        return scanners.flatMap(s -> rotateMatrix(s, rm));
+    }
+
+    static Stream<Scanner> rotateMatrix(Scanner s, int[][] rm) {
         Set<Scanner> res = new HashSet<>();
-        for (int x = 0; x < 4; x++) {
-            s = s.rotate(X);
-            for (int y = 0; y < 4; y++) {
-                s = s.rotate(Y);
-                for (int z = 0; z < 4; z++) {
-                    s = s.rotate(Z);
-                    res.add(s);
-                }
-            }
+        for (int i = 0; i < 4; i++) {
+            s = s.rotate(rm);
+            res.add(s);
         }
         return res.stream();
     }
