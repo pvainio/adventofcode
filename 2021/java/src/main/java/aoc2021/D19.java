@@ -45,7 +45,7 @@ public class D19 {
 
     public static void main(String... args) throws IOException 
     {
-        List<Scanner> scanners = Stream.of(Files.readString(Path.of("../input/19a_test.txt"))
+        List<Scanner> scanners = Stream.of(Files.readString(Path.of("../input/19a.txt"))
                 .split("--- scanner \\d+ ---")).filter(s -> !s.isBlank())
                 .map(s -> parseScanner(s)).toList();
 
