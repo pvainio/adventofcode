@@ -5,8 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 /**
  * Advent of Code (AOC) 2021 Day 20
@@ -21,6 +21,12 @@ public class D20 {
             int maxY = pixels.stream().mapToInt(p -> p.y).max().getAsInt();
             int maxX = pixels.stream().mapToInt(p -> p.x).max().getAsInt();
             return new Image(background, pixels, minX, minY, maxX, maxY);
+        }
+        boolean bit(int x, int y) {
+            if (x < x1 || x > x2 || y < y1 || y > y2) {
+                return background; // changing background for out of pixel bits
+            } 
+            return pixels.contains(new Pixel(x, y));
         }
     }
 
@@ -58,29 +64,20 @@ public class D20 {
         Set<Pixel> output = new HashSet<>();
         for (int y = image.y1 - extend; y <= image.y2 + extend; y++) {
             for (int x = image.x1 - extend; x <= image.x2 + extend; x++) {
-                enhancePixel(new Pixel(x, y), image, algorithm).forEach(output::add);
+                enhancePixel(new Pixel(x, y), image, algorithm).ifPresent(output::add);
             }
         }
         return output;
     }
 
-    static Stream<Pixel> enhancePixel(Pixel p, Image source, String algorithm) {
+    static Optional<Pixel> enhancePixel(Pixel p, Image source, String algorithm) {
         int bits = 0;
         for (int y = p.y-1; y <= p.y+1; y++) {
             for (int x = p.x-1; x <= p.x+1; x++) {
-                bits = bits << 1;
-                bits += bit(x, y, source) ? 1 : 0;
+                bits = (bits << 1) + (source.bit(x, y) ? 1 : 0);
             }
         }
-        return algorithm.charAt(bits) == '.' ? Stream.empty() : Stream.of(p);
-    }
-
-    static boolean bit(int x, int y, Image image) {
-        if (x < image.x1 || x > image.x2 || y < image.y1 || y > image.y2) {
-            return image.background;
-        } else {
-            return image.pixels.contains(new Pixel(x, y));
-        }
+        return algorithm.charAt(bits) == '.' ? Optional.empty() : Optional.of(p);
     }
 
     static Image parseImage(List<String> data) {
