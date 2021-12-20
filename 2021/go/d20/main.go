@@ -44,11 +44,12 @@ func enhanceImage(input Image, algorithm string) Image {
 	increase := 1
 	background := false
 	for extend := 1; increase > 0 && !background; extend++ {
+		// echange and extend size with each step to detect changing background color
 		prevCount := len(output)
 		output = enhanceWithExtendedSize(extend, input, algorithm)
 		increase = len(output) - prevCount
 		borderSize := 2*(input.x2-input.x1+extend*2) + 2*(input.y2-input.y1+extend*2)
-		background = borderSize == increase
+		background = borderSize == increase // The whole extended area/border is the same color, change background
 	}
 	return NewImage(background, output)
 }
