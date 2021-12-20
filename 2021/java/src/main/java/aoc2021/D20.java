@@ -46,7 +46,7 @@ public class D20 {
         boolean background = false;
         for (int extend = 1; increase > 0 && !background; extend++) { // enhance in loop each time extending border 1 pixel further
             int prevCount = output.size();
-            output = enchangePixelslWithExtendedSize(extend, input, algorithm);
+            output = enhancePixelslWithExtendedSize(extend, input, algorithm);
             increase = output.size()-prevCount;
             int borderSize = 2*(input.x2-input.x1 + extend*2) + 2*(input.y2-input.y1 + extend*2);
             background = borderSize == increase;  // all the pixels in border are set -> background changed color to 1
@@ -54,17 +54,17 @@ public class D20 {
         return Image.create(background, output);
     }
 
-    static Set<Pixel> enchangePixelslWithExtendedSize(int extend, Image image, String algorithm) {
+    static Set<Pixel> enhancePixelslWithExtendedSize(int extend, Image image, String algorithm) {
         Set<Pixel> output = new HashSet<>();
         for (int y = image.y1 - extend; y <= image.y2 + extend; y++) {
             for (int x = image.x1 - extend; x <= image.x2 + extend; x++) {
-                enchangePixel(new Pixel(x, y), image, algorithm).forEach(output::add);
+                enhancePixel(new Pixel(x, y), image, algorithm).forEach(output::add);
             }
         }
         return output;
     }
 
-    static Stream<Pixel> enchangePixel(Pixel p, Image source, String algorithm) {
+    static Stream<Pixel> enhancePixel(Pixel p, Image source, String algorithm) {
         int bits = 0;
         for (int y = p.y-1; y <= p.y+1; y++) {
             for (int x = p.x-1; x <= p.x+1; x++) {
