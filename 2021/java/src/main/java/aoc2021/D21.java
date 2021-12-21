@@ -1,6 +1,5 @@
 package aoc2021;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,39 +10,55 @@ public class D21 {
 
     record Player(int pos, int score) {
         Player move(int m) {
-            int newPos = (this.pos + m - 1) % 10 + 1;
+            int newPos = (this.pos + m - 1) % 10 + 1; // calculate new position
             return new Player(newPos, score + newPos);
         }
     }
 
-    record State(int totalRolls, int prev, int prev2, Player p1, Player p2) {}
+    record State(int totalRolls, int prevRoll, int prevRoll2, Player p1, Player p2) {
+        boolean gameOver(int score) {
+            return p1.score >= score || p2.score >= score;
+        }
+        int playerInTurn() {
+            return (totalRolls / 3) % 2;
+        }
+        State roll(int currentRoll) {
+            int playerRollNumber = totalRolls % 3; // number of roll for current player
+            Player p1 = this.p1;
+            Player p2 = this.p2;
+            if (playerRollNumber == 2) { // third roll for the player, move it
+                int totalRollSum = currentRoll + prevRoll + prevRoll2; // rolls sum
+                if (playerInTurn() == 0) {
+                    p1 = this.p1.move(totalRollSum);
+                } else {
+                    p2 = this.p2.move(totalRollSum);
+                }
+            }
+            return new State(totalRolls+1, currentRoll, prevRoll, p1, p2);
+        }
+    }
 
-    static int rollPracticeDice(int rolls) {
-        return (rolls + 1) % 100 - 1;
+    static State rollPracticeDice(State state) {
+        int currentRoll = (state.totalRolls) %100 + 1;
+        return state.roll(currentRoll);
     }
 
     public static void main(String... args)
     {
-        Player[] players = {new Player(8,0), new Player(6,0)};
-        int totalRolls = 0;
-        while(players[0].score < 1000 && players[1].score < 1000) { // until wins
-            int player = (totalRolls / 3) % 2; // player in turn, index to players table
-            int roll = 0;
-            roll += rollPracticeDice(++totalRolls); // roll 1
-            roll += rollPracticeDice(++totalRolls); // roll 2
-            roll += rollPracticeDice(++totalRolls); // roll 3
-            players[player] = players[player].move(roll); // move player and update players table
+        State state = new State(0, 0, 0, new Player(8,0), new Player(6,0));
+        while(!state.gameOver(1000)) { // until wins
+            state = rollPracticeDice(state);
         }
-        int losingScore = Arrays.stream(players).mapToInt(p -> p.score).min().getAsInt();
-        System.out.printf("part 1: %s\n", losingScore * totalRolls);
+        int losingScore = Math.min(state.p1.score, state.p2.score);
+        System.out.printf("part 1: %s\n", losingScore * state.totalRolls);
 
         Map<State, long[]> cache = new HashMap<>();
-        State s = new State(0, 0, 0,new Player(8,0), new Player(6,0));
-        var res = play(s, cache);
+        state = new State(0, 0, 0, new Player(8,0), new Player(6,0));
+        var res = play(state, cache);
         System.out.printf("part 2: %s\n", Math.max(res[0], res[1]));
     }
 
-    // play state, return table of two, player 1 wins and player 2 wins
+    // play state, return array of two, player 1 wins and player 2 wins
     static long[] play(State state, Map<State, long[]> cache) {
         long[] cached = cache.get(state);
         if (cached == null) {
@@ -58,29 +73,12 @@ public class D21 {
         return cached;
     }
 
-    // play state with dice rolling given value, return table of two, player 1 wins and player 2 wins
+    // play state with dice rolling given value, return array of two, player 1 wins and player 2 wins
     static long[] playRound(int currentRoll, State state, Map<State, long[]> cache) {
-        boolean firstPlayer = (state.totalRolls / 3) % 2 == 0; // get the player based on dice rolls
-        int playerRollNumber = state.totalRolls % 3; // number of rolls for current player
-
-        Player p1 = state.p1;
-        Player p2 = state.p2;
-        if (playerRollNumber == 2) {
-            // third roll for the player
-            int totalRollSum = currentRoll + state.prev + state.prev2; // rolls sum
-            Player moved = (firstPlayer ? state.p1 : state.p2).move(totalRollSum);
-
-            if (moved.score >= 21) {
-                return firstPlayer ? new long[]{1, 0} : new long[]{ 0, 1};
-            }
-
-            if (firstPlayer) {
-                p1 = moved;
-            } else {
-                p2 = moved;
-            } 
+        state = state.roll(currentRoll);
+        if (state.gameOver(21)) {
+            return state.playerInTurn() == 0 ? new long[]{1,0} : new long[]{0,1};
         }
-        var newState = new State(state.totalRolls+1, currentRoll, state.prev, p1, p2);
-        return play(newState, cache);
+        return play(state, cache);
     }
 }

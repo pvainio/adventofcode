@@ -57,10 +57,12 @@ func playRound(currentRoll int, state State, cache map[State][2]int64) [2]int64 
 	state = state.roll(currentRoll)
 
 	if state.gameOver(21) { // We have winner, return it as array 0,1 or 1,0
-		res := [2]int64{0, 0}
 		currentPlayer := (state.totalRolls / 3) % 2
-		res[currentPlayer] = 1
-		return res
+		if currentPlayer == 0 {
+			return [2]int64{1, 0}
+		} else {
+			return [2]int64{0, 1}
+		}
 	}
 	return playRecursiveUniverses(state, cache)
 }
@@ -75,12 +77,11 @@ func (state State) rollPracticeDice() State {
 }
 
 func (state State) roll(currentRoll int) State {
-	playerRollNumber := state.totalRolls % 3 // number of rolls for current player
+	playerRollNumber := state.totalRolls % 3 // number of roll for current player
 	currentPlayer := (state.totalRolls / 3) % 2
 	state.totalRolls += 1
 
-	if playerRollNumber == 2 {
-		// third roll for the player, move it
+	if playerRollNumber == 2 { // third roll for the player, move it
 		totalRollSum := currentRoll + state.prevRoll + state.prevRoll2 // rolls sum
 		moved := state.players[currentPlayer].move(totalRollSum)
 		state.players[currentPlayer] = moved
