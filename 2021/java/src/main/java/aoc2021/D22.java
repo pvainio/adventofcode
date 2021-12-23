@@ -50,7 +50,7 @@ public class D22 {
         }
 
         Cube intersect(Cube c) { // intersect of two cubes
-            return new Cube(!c.on, x.intersect(c.x), y.intersect(c.y), z.intersect(c.z));
+            return new Cube(c.on, x.intersect(c.x), y.intersect(c.y), z.intersect(c.z));
         }
 
         boolean valid() { // if this cube is a valid cube
