@@ -1,0 +1,5 @@
+inp w
+add w 10
+inp y
+add y 2
+add w y
