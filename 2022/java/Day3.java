@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-class Day3d {
+class Day3 {
     public static void main(String ... args) throws Exception {
         var input = Files.readString(Path.of("../input/day3.txt"));
         var sum = input.lines().mapToInt(l -> {
