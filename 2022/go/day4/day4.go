@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -40,16 +39,7 @@ func (s1 sections) overlap(s2 sections) bool {
 }
 
 func parsePair(line string) (sections, sections) {
-	ranges := strings.Split(line, ",")
-	return parseSection(ranges[0]), parseSection(ranges[1])
-}
-
-func parseSection(r string) sections {
-	ends := strings.Split(r, "-")
-	return sections{start: atoi(ends[0]), end: atoi(ends[1])}
-}
-
-func atoi(a string) int {
-	i, _ := strconv.Atoi(a)
-	return i
+	var s1, s2 sections
+	fmt.Sscanf(line, "%d-%d,%d-%d", &s1.start, &s1.end, &s2.start, &s2.end)
+	return s1, s2
 }
