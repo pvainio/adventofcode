@@ -1,12 +1,14 @@
 # adventofcode AOC
 
-[Advent of Code (AOC)](https://adventofcode.com/) for 2023 with:
+[Advent of Code (AOC)](https://adventofcode.com/)
+
+2023:
 - [JavaScript](2023/js)
 
-[Advent of Code (AOC)](https://adventofcode.com/) for 2022 with:
+2022:
 - [Go](2022/go)
 - [Java](2022/java)
 
-[Advent of Code (AOC)](https://adventofcode.com/) for 2021 with:
+2021:
 - [Go](2021/go)
 - [Java](2021/java/src/main/java/aoc2021)
