@@ -1,0 +1,9 @@
+{
+  "type": "module",
+  "name": "aoc2023",
+  "version": "1.0.0",
+  "scripts": {
+    "day1": "node day1.js",
+    "day2": "node day2.js"
+  }
+}
