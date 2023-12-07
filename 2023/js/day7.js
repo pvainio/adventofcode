@@ -40,7 +40,7 @@ const handScorer = (useJokers) => (hand) => {
   return 0; // high card
 }
 
-const handSorter = (a, b, handScorer, cardScorer) => {
+const handSorter = (handScorer, cardScorer) => (a, b) => {
   if (handScorer(a) !== handScorer(b)) {
     return handScorer(a) - handScorer(b);
   }
@@ -53,17 +53,18 @@ const handSorter = (a, b, handScorer, cardScorer) => {
   return 0;
 }
 
-const winnings = (handScorer, cardScorer) => {
-  const sorted = hands.sort((a, b) => handSorter(a[0], b[0], handScorer, cardScorer));
-  return sorted.map((hand, index) => hand[1] * (index+1)).reduce((a, b) => a + b, 0);
+const winnings = (handSorter) => {
+  const sorted = hands.sort((a, b) => handSorter(a[0], b[0]));
+  return sorted.map((hand, index) => hand[1] * (index+1))
+    .reduce((a, b) => a + b, 0);
 }
 
-const part1HandScorer = handScorer(false);
-const part1CardScorer = cardScorer(cardScore);
+const part1Sorter = handSorter(handScorer(false), cardScorer(cardScore));
+const winnings1 = winnings(part1Sorter);
 
-console.log(`part 1: ${winnings(part1HandScorer, part1CardScorer)}`);
+console.log(`part 1: ${winnings1}`);
 
-const part2HandScorer = handScorer(true);
-const part2CardScorer = cardScorer(jokerScore);
+const part2Sorter = handSorter(handScorer(true), cardScorer(jokerScore));
+const winnings2 = winnings(part2Sorter);
 
-console.log(`part 2: ${winnings(part2HandScorer, part2CardScorer)}`);
+console.log(`part 2: ${winnings2}`);
