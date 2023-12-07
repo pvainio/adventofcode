@@ -3,12 +3,11 @@ import { asLines } from './util.js';
 const input = asLines('../input/day7.txt');
 const hands = input.map(line => line.split(' '))
 
-const countCards = (hand) => {
-  const counts = Array.from(hand).reduce((acc, cur) => {
-    acc[cur] ? acc[cur]++ : acc[cur] = 1;
+const countCards = (hand) => { // build up a map of card kinds to counts
+  return Array.from(hand).reduce((acc, cur) => {
+    acc[cur] ? acc[cur]++ : acc[cur] = 1; 
     return acc;
   }, {});
-  return counts;
 }
 
 const cardScore = 'AKQJT98765432'.split('');
