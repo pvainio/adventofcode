@@ -12,6 +12,7 @@
     "day7": "node day7.js",
     "day8": "node day8.js",
     "day9": "node day9.js",
-    "day10": "node day10.js"
+    "day10": "node day10.js",
+    "day11": "node day11.js"
   }
 }
