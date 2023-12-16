@@ -33,20 +33,11 @@ console.log(`part1: ${energized}`);
 
 let energized2 = 0;
 for (let y = 0; y < layout.length; y++) {
-  for (let x = 0; x < layout[0].length; x++) {
-    if (y === 0) {
-      energized2 = Math.max(energized2, traceLights(layout, [{x, y, dx: 0, dy: 1}]));
-    }
-    if (x === 0) {
-      energized2 = Math.max(energized2, traceLights(layout, [{x, y, dx: 1, dy: 0}]));
-    }
-    if (y === layout.length - 1) {
-      energized2 = Math.max(energized2, traceLights(layout, [{x, y, dx: 0, dy: -1}]));
-    }
-    if (x === layout[0].length - 1) {
-      energized2 = Math.max(energized2, traceLights(layout, [{x, y, dx: -1, dy: 0}]));
-    }
-  }
+  energized2 = Math.max(energized2, traceLights(layout, [{x: 0, y, dx: 1, dy: 0}]));
+  energized2 = Math.max(energized2, traceLights(layout, [{x: layout[0].length - 1, y, dx: -1, dy: 0}]));
 }
-
+for (let x = 0; x < layout[0].length; x++) {
+  energized2 = Math.max(energized2, traceLights(layout, [{x, y: 0, dx: 0, dy: 1}]));
+  energized2 = Math.max(energized2, traceLights(layout, [{x, y: layout.length - 1, dx: 0, dy: -1}]));
+}
 console.log(`part2: ${energized2}`);
