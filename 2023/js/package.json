@@ -21,6 +21,7 @@
     "day16": "node day16.js",
     "day17": "node day17.js",
     "day18": "node day18.js",
-    "day19": "node day19.js"
+    "day19": "node day19.js",
+    "day20": "node day20.js"
   }
 }
