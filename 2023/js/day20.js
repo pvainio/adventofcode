@@ -21,14 +21,26 @@ const send = (mod, signal, counter, queue) => {
   counter[signal] += mod.outputs.length;
 };
 
+let count = 0;
+let firstHigh = {};
+let secondHigh = {};
+
 const ping = (counter) => {
   const queue = [ ['broadcaster', LOW, 'button'] ];
   counter[0]++;
   while (queue.length > 0) {
     const [dest, signal, source] = queue.shift();
-    if (dest === 'rx' && signal === LOW) {
-      return true;
+
+    // part2, identify cycles for zr inputs, that control rx
+    const zrInputs = modules.get('zr').inputs; // zr controls rx
+    if ([...zrInputs.entries()].find(([key, value]) => dest === key && value === HIGH)) {
+      if (!firstHigh[source]) {
+        firstHigh[source] = count;
+      } else if (count > firstHigh[source] && !secondHigh[source]) {
+        secondHigh[source] = count;
+      }
     }
+
     const mod = modules.get(dest);
     if (mod === undefined) {
       continue;
@@ -54,13 +66,20 @@ for (let i = 0; i < 1000; i++) {
 
 console.log(`part1: ${counter[0]*counter[1]}`);
 
-// kind of quessed this brute force approach does not work
-let count = 0;
 while(true) {
   count++;
-  if (ping(counter)) {
-    break;
+  ping(counter);
+  if (Object.keys(secondHigh).length === 4) {
+    break; // we have found cycles for all zr inputs that control rx
   }
 }
 
-console.log(`part2: ${count}`);
+// calculate the cycle lengths for the zr inputs
+const cycles = Object.entries(secondHigh).map(([key, value]) => value - firstHigh[key]);
+
+// calculate the count when cycles match and will trigger rx
+const greatestCommonDivisor = (a, b) => b ? greatestCommonDivisor(b, a % b) : a;
+const leastCommonMultiple = (a, b) => a * b / greatestCommonDivisor(a, b);
+const lcm = cycles.reduce((a, b) => leastCommonMultiple(a, b));
+
+console.log(`part2: ${lcm}`);
