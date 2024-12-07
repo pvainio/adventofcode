@@ -2,6 +2,9 @@
 
 [Advent of Code (AOC)](https://adventofcode.com/)
 
+2024:
+- [JavaScript](2024/js)
+
 2023:
 - [JavaScript](2023/js)
 
