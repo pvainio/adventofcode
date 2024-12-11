@@ -11,10 +11,20 @@ const blinkStone = (stone) => {
   return [2024 * stone];
 };
 
-const blink = (stones) => stones.flatMap(s => blinkStone(s));
-
-let afterBlink = stones;
-for (let i = 0; i < 25; i++) {
-  afterBlink = blink(afterBlink);
+const cache = {};
+const numberAfterBlinks = (stone, blinks) => {
+  const key = `${stone}.${blinks}`;
+  if (cache[key]) return cache[key];
+  if (blinks == 0) return 1;
+  const stones = blinkStone(stone);
+  const ret = stones.map(s => numberAfterBlinks(s, blinks-1)).reduce((a, b) => a + b);
+  cache[key] = ret;
+  return ret;
 }
-console.log(afterBlink.length);
+
+const stonesAfterBlinks = (stones, blinks) => {
+  return stones.map(s => numberAfterBlinks(s, blinks)).reduce((a, b) => a + b);
+}
+
+console.log(`part1: ${stonesAfterBlinks(stones, 25)}`);
+console.log(`part2: ${stonesAfterBlinks(stones, 75)}`);
